@@ -1,0 +1,59 @@
+{
+  "name": "uptime-monitor",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "dev": "npm run build:packages && concurrently -k -n packages,gateway,api,worker,web \"npm run dev:packages\" \"npm run dev -w @uptime/gateway\" \"npm run dev -w @uptime/api\" \"npm run dev -w @uptime/worker\" \"npm run dev -w @uptime/web\"",
+    "dev:packages": "concurrently -n shared,registry \"npm run dev -w @uptime/shared\" \"npm run dev -w @uptime/service-registry\"",
+    "build:packages": "npm run build -w @uptime/shared -w @uptime/service-registry -w @uptime/database -w @uptime/nest-common",
+    "build": "npm run build:packages && npm run build -w @uptime/gateway -w @uptime/api -w @uptime/worker -w @uptime/web",
+    "typecheck": "npm run build:packages && npm run typecheck --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "db:migrate": "npm run migrate:deploy -w @uptime/database",
+    "db:migrate:dev": "npm run migrate:dev -w @uptime/database",
+    "db:studio": "npm run studio -w @uptime/database",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@eslint/js": "^10.0.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.0",
+    "concurrently": "^10.0.5",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-check-file": "^3.3.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "jest": "^30.5.2",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.9",
+    "ts-jest": "^29.4.14",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0"
+  },
+  "overrides": {
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@^9.4.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js}": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css,html}": "prettier --write"
+  }
+}
