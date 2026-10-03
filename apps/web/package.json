@@ -1,0 +1,33 @@
+{
+  "name": "@uptime/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mui/icons-material": "^9.4.0",
+    "@mui/material": "^9.4.0",
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@^9.4.0",
+    "@tanstack/react-query": "^5.104.0",
+    "@uptime/shared": "*",
+    "axios": "^1.20.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0",
+    "styled-components": "^6.5.3"
+  },
+  "devDependencies": {
+    "@tanstack/react-query-devtools": "^5.104.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3"
+  }
+}
