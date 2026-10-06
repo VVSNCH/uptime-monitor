@@ -1,0 +1,152 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+  previewFeatures     = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  isDemo       Boolean  @default(false) @map("is_demo")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  monitors      Monitor[]
+  channels      NotificationChannel[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  familyId  String    @map("family_id")
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+enum MonitorStatus {
+  PENDING
+  UP
+  DOWN
+  PAUSED
+
+  @@map("monitor_status")
+}
+
+model Monitor {
+  id               Int     @id @default(autoincrement())
+  userId           Int     @map("user_id")
+  name             String
+  url              String
+  method           String  @default("GET")
+  intervalSeconds  Int     @map("interval_seconds")
+  timeoutMs        Int     @default(10000) @map("timeout_ms")
+  expectedStatus   Int?    @map("expected_status")
+  failureThreshold Int     @default(2) @map("failure_threshold")
+  paused           Boolean @default(false)
+  isSeeded         Boolean @default(false) @map("is_seeded")
+
+  // Current state, written only by the worker so the list screen is one query.
+  status              MonitorStatus @default(PENDING)
+  consecutiveFailures Int           @default(0) @map("consecutive_failures")
+  lastCheckedAt       DateTime?     @map("last_checked_at") @db.Timestamptz(3)
+  lastResponseMs      Int?          @map("last_response_ms")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checks     Check[]
+  incidents  Incident[]
+  dailyStats DailyStat[]
+
+  @@index([userId])
+  @@map("monitors")
+}
+
+model Check {
+  id           BigInt   @id @default(autoincrement())
+  monitorId    Int      @map("monitor_id")
+  scheduledFor DateTime @map("scheduled_for") @db.Timestamptz(3)
+  checkedAt    DateTime @default(now()) @map("checked_at") @db.Timestamptz(3)
+  ok           Boolean?
+  statusCode   Int?     @map("status_code")
+  responseMs   Int?     @map("response_ms")
+  error        String?
+
+  monitor Monitor @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+
+  @@unique([monitorId, scheduledFor])
+  @@index([monitorId, checkedAt])
+  @@map("checks")
+}
+
+model Incident {
+  id        Int       @id @default(autoincrement())
+  monitorId Int       @map("monitor_id")
+  startedAt DateTime  @map("started_at") @db.Timestamptz(3)
+  endedAt   DateTime? @map("ended_at") @db.Timestamptz(3)
+  cause     String
+
+  monitor Monitor @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+
+  @@unique([monitorId], map: "incidents_one_open_per_monitor", where: raw("ended_at IS NULL"))
+  @@index([monitorId, startedAt])
+  @@map("incidents")
+}
+
+model DailyStat {
+  monitorId     Int      @map("monitor_id")
+  day           DateTime @db.Date
+  upCount       Int      @map("up_count")
+  downCount     Int      @map("down_count")
+  avgResponseMs Int?     @map("avg_response_ms")
+
+  monitor Monitor @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+
+  @@id([monitorId, day])
+  @@map("daily_stats")
+}
+
+enum ChannelType {
+  EMAIL
+  WEBHOOK
+
+  @@map("channel_type")
+}
+
+// Belongs to a user, not to monitors: every enabled channel receives every
+// alert that user's monitors produce.
+model NotificationChannel {
+  id            Int         @id @default(autoincrement())
+  userId        Int         @map("user_id")
+  type          ChannelType
+  target        String
+  secret        String?
+  enabled       Boolean     @default(true)
+  sendOnDown    Boolean     @default(true) @map("send_on_down")
+  sendOnRecover Boolean     @default(true) @map("send_on_recover")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notification_channels")
+}
