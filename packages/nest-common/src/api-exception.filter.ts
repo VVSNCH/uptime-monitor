@@ -32,7 +32,9 @@ export class ApiExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const body = this.toApiError(exception)
 
-    if (body.statusCode >= FIRST_SERVER_ERROR) {
+    // AppExceptions are answers the code chose to give, already logged where
+    // they were raised. Only the unexpected gets a stack trace.
+    if (body.statusCode >= FIRST_SERVER_ERROR && !(exception instanceof AppException)) {
       this.logger.error(
         exception instanceof Error ? (exception.stack ?? exception.message) : exception,
       )
