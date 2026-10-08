@@ -67,6 +67,13 @@ export class MonitorsController {
     return this.monitors.setPaused(user.id, id, true)
   }
 
+  /** Queues one check straight away. The result arrives through the monitor, not this response. */
+  @Post(':id/check')
+  @HttpCode(HttpStatus.ACCEPTED)
+  checkNow(@CurrentUser() user: AuthUser, @Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.monitors.checkNow(user.id, id)
+  }
+
   @Post(':id/resume')
   @HttpCode(HttpStatus.OK)
   resume(

@@ -17,7 +17,7 @@ export {
   TRANSITION,
   type Transition,
 } from './constants/notification.js'
-export { QUEUE_NAMES, type QueueName } from './constants/queues.js'
+export { JOB_NAMES, QUEUE_NAMES, type QueueName } from './constants/queues.js'
 export { SERVICE_NAMES, type ServiceName } from './constants/services.js'
 export { STATS_WINDOWS, type StatsWindow, UPTIME_HISTORY_DAYS } from './constants/stats.js'
 export type {

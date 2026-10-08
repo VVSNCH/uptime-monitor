@@ -24,6 +24,15 @@ export class MonitorsRepository {
     return this.prisma.monitor.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } })
   }
 
+  // The one query that crosses users, for the scheduler only. It returns just
+  // what scheduling needs, so nothing user-facing can be built on it.
+  listAllActive(): Promise<{ id: number; intervalSeconds: number; paused: boolean }[]> {
+    return this.prisma.monitor.findMany({
+      where: { paused: false },
+      select: { id: true, intervalSeconds: true, paused: true },
+    })
+  }
+
   findForUser(userId: number, id: number): Promise<Monitor | null> {
     return this.prisma.monitor.findFirst({ where: { id, userId } })
   }

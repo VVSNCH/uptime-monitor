@@ -6,3 +6,7 @@ export const REFRESH_TOKEN_BYTES = 32
 export const MS_PER_DAY = 86_400_000
 
 export const AUTH_THROTTLE = { name: 'auth', ttl: 60_000, limit: 10 } as const
+
+export const MONITOR_SCHEDULER_PREFIX = 'monitor-'
+export const SCHEDULE_RECONCILE_INTERVAL_MS = 5 * 60_000
+export const FINISHED_CHECK_JOBS_KEPT = 1_000
