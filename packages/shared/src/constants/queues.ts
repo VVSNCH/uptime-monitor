@@ -5,3 +5,7 @@ export const QUEUE_NAMES = {
 } as const
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES]
+
+export const JOB_NAMES = {
+  check: 'check',
+} as const

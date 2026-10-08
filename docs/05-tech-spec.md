@@ -209,7 +209,7 @@ PATCH  /monitors/:id
 DELETE /monitors/:id
 POST   /monitors/:id/pause
 POST   /monitors/:id/resume
-POST   /monitors/:id/check          run one check now
+POST   /monitors/:id/check          run one check now: 202, 409 if paused, 503 if it cannot be queued
 
 GET    /monitors/:id/checks?from=&to=
 GET    /monitors/:id/stats?window=24h|7d|30d|90d
@@ -237,7 +237,7 @@ one does not answer.
 
 | Queue | Producer | Job data | Notes |
 |---|---|---|---|
-| `checks` | api scheduler, and BullMQ repeatables | `{ monitorId, scheduledFor }` | Repeatable per monitor. Attempts 1 — retrying a check is meaningless, the next occurrence is the retry |
+| `checks` | BullMQ job schedulers, one per monitor; the api for on-demand checks | `{ monitorId, requestedAt? }` | Attempts 1 — retrying a check is meaningless, the next occurrence is the retry. `requestedAt` is set only on on-demand checks; a scheduled check takes its occurrence from the job |
 | `notifications` | worker state machine | `{ incidentId, transition }` | Attempts 5, exponential backoff |
 | `rollup` | Repeatable, nightly | `{ day }` | Idempotent upsert into DailyStat |
 
