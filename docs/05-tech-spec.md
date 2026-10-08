@@ -13,7 +13,7 @@ Version 0.1 · Draft for review
 | ORM and migrations | Prisma |
 | Queue | BullMQ over Redis |
 | Validation | class-validator with a global ValidationPipe |
-| Auth | @nestjs/jwt, argon2, passport-jwt |
+| Auth | @nestjs/jwt, @node-rs/argon2, a global guard (no Passport), @nestjs/throttler |
 | HTTP client | undici `fetch` with an abort timeout and a guarded DNS lookup |
 | Email | Nodemailer over SMTP |
 | Frontend | Vite, React, React Router |
@@ -75,10 +75,13 @@ uptime-monitor/
     │       ├── app.module.ts
     │       ├── auth/
     │       │   ├── auth.controller.ts
-    │       │   ├── auth.service.ts
-    │       │   ├── refresh-token.service.ts
-    │       │   ├── jwt.strategy.ts
-    │       │   └── guards/
+    │       │   ├── auth.service.ts           register, login, password change
+    │       │   ├── token.service.ts          access tokens, refresh rotation
+    │       │   ├── refresh-token.repository.ts
+    │       │   ├── refresh-cookie.service.ts
+    │       │   ├── guards/                   global JWT guard
+    │       │   └── decorators/               @Public(), @CurrentUser()
+    │       ├── users/                        users repository
     │       ├── monitors/
     │       │   ├── monitors.controller.ts
     │       │   ├── monitors.service.ts
@@ -197,6 +200,7 @@ POST   /auth/refresh
 POST   /auth/logout
 POST   /auth/logout-all                 revoke every refresh-token family
 PATCH  /auth/password                   requires the current password
+GET    /auth/me                         the signed-in user
 
 GET    /monitors
 POST   /monitors
@@ -257,10 +261,12 @@ API_HOST=localhost                     address the api registers under
 WORKER_PORT=3002
 WORKER_HOST=localhost
 VITE_API_URL=http://localhost:3000/api baked into the web build
-JWT_ACCESS_SECRET
-JWT_ACCESS_TTL=15m
-JWT_REFRESH_SECRET
-JWT_REFRESH_TTL=30d
+JWT_ACCESS_SECRET                      at least 32 characters
+JWT_ACCESS_TTL_SECONDS=900
+REFRESH_TOKEN_TTL_DAYS=30
+COOKIE_SECURE=true                     false only for local http
+COOKIE_SAME_SITE=lax
+REFRESH_COOKIE_PATH=/api/v1/auth
 SMTP_URL
 ALERT_FROM_EMAIL
 APP_PUBLIC_URL
@@ -270,7 +276,7 @@ HEARTBEAT_URL                        optional; worker pings after each cycle
 LOG_LEVEL=info
 LOG_FORMAT=json                        pretty for local development
 API_DOCS_ENABLED=true                  serve Swagger UI at /api/docs
-STALE_INTERVAL_MULTIPLIER=3
+TEST_DATABASE_URL                      integration tests only; must end in _test
 ALLOW_PRIVATE_TARGETS=false              worker may check localhost and private networks
 DEMO_SEED_ENABLED=false
 ```
@@ -339,7 +345,11 @@ Targeted at logic that fails silently:
   private one
 - **Rollup** — running the same day twice does not double the counts
 - **Auth** — refresh rotation, and reuse revoking the family
-- **One integration test** per service using Testcontainers for Postgres
+- **Ownership** against a real Postgres: one user can never read, change,
+  pause or delete another user's monitor. These run against
+  `TEST_DATABASE_URL`, which must name a database ending in `_test` because the
+  tests truncate it; without one they are skipped. CI starts its own Postgres
+  for them, so they always run there
 
 Controllers are not unit-tested. Frontend appearance is not tested.
 

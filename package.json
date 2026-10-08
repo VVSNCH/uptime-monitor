@@ -19,6 +19,7 @@
     "test": "npm run test --workspaces --if-present",
     "db:migrate": "npm run migrate:deploy -w @uptime/database",
     "db:migrate:dev": "npm run migrate:dev -w @uptime/database",
+    "db:migrate:test": "npm run migrate:test -w @uptime/database",
     "db:studio": "npm run studio -w @uptime/database",
     "lint": "eslint .",
     "format": "prettier --write .",

@@ -23,7 +23,8 @@
     "typecheck": "tsc --noEmit",
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "migrate:test": "node scripts/migrate-test.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",

@@ -20,6 +20,11 @@ export const MONITOR_LIMITS = {
   urlMaxLength: 2048,
   timeoutMs: { min: 1_000, max: 30_000, default: 10_000 },
   failureThreshold: { min: 1, max: 10, default: 2 },
+  expectedStatus: { min: 100, max: 599 },
 } as const
+
+// A monitor not checked within this many of its own intervals is stale: its
+// last status is no longer evidence of anything.
+export const STALE_INTERVAL_MULTIPLIER = 3
 
 export const ALLOWED_URL_PROTOCOLS = ['http:', 'https:'] as const

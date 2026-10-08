@@ -47,6 +47,14 @@ CREATE DATABASE uptime_monitor OWNER uptime;
 `CREATEDB` is only needed locally, where `prisma migrate dev` creates a
 temporary shadow database.
 
+Integration tests use a separate database, so they can empty it freely. Create
+it once and point `TEST_DATABASE_URL` at it:
+
+```sh
+createdb -U uptime uptime_monitor_test
+npm run db:migrate:test
+```
+
 - web: http://localhost:5000
 - gateway: http://localhost:3000/health (lists registered instances)
 - api, through the gateway: http://localhost:3000/api/v1/health
@@ -57,14 +65,15 @@ the gateway.
 
 ## Scripts
 
-| Command                  | What it does                            |
-| ------------------------ | --------------------------------------- |
-| `npm run dev`            | Runs every app in watch mode            |
-| `npm run build`          | Builds every workspace                  |
-| `npm run typecheck`      | Typechecks every workspace              |
-| `npm test`               | Runs the test suites                    |
-| `npm run db:migrate`     | Applies committed migrations            |
-| `npm run db:migrate:dev` | Creates a migration from schema changes |
-| `npm run db:studio`      | Opens Prisma Studio                     |
-| `npm run lint`           | ESLint across the repo                  |
-| `npm run format`         | Prettier across the repo                |
+| Command                   | What it does                            |
+| ------------------------- | --------------------------------------- |
+| `npm run dev`             | Runs every app in watch mode            |
+| `npm run build`           | Builds every workspace                  |
+| `npm run typecheck`       | Typechecks every workspace              |
+| `npm test`                | Runs the test suites                    |
+| `npm run db:migrate`      | Applies committed migrations            |
+| `npm run db:migrate:dev`  | Creates a migration from schema changes |
+| `npm run db:migrate:test` | Applies migrations to the test database |
+| `npm run db:studio`       | Opens Prisma Studio                     |
+| `npm run lint`            | ESLint across the repo                  |
+| `npm run format`          | Prettier across the repo                |

@@ -229,6 +229,11 @@ the latest `Check`. Deriving it means a correlated subquery per monitor on the
 busiest screen in the product. The duplication is deliberate and the worker is
 its only writer.
 
+Pausing does not break that rule. The api sets `paused`, a separate column it
+owns, and reports a paused monitor as `PAUSED` whatever its stored status. On
+resume the stored status is still the last thing the worker saw; the monitor
+reads as stale until its next check confirms or replaces it, which is honest.
+
 **`@@unique([monitorId, scheduledFor])`** is how at-most-once is enforced. See
 section 4. It is also why `Check.ok` is nullable: the row is written to claim
 the occurrence before the request runs, and `null` means claimed but not yet
@@ -381,14 +386,40 @@ because a retention policy retro-fitted to a full table is a migration.
 
 ## 8. Authentication
 
-Short-lived JWT access tokens and rotating refresh tokens stored hashed in the
-database, grouped into a family per login.
+Two tokens, with different jobs:
 
-Presenting a refresh token that has already been used means the token leaked:
-the entire family is revoked and the user is signed out everywhere. This is the
-standard detection for stolen refresh tokens and costs one extra column.
+- **Access token**: a JWT valid for 15 minutes, sent as `Authorization: Bearer`.
+  The web app keeps it in memory only, so a page reload asks for a new one.
+- **Refresh token**: 32 random bytes, valid for 30 days, stored in the database
+  only as a SHA-256 hash. It travels in an `httpOnly` cookie scoped to
+  `/api/v1/auth`, so scripts on the page cannot read it and the browser sends it
+  nowhere else.
 
-Passwords are hashed with argon2id. Every monitor query is scoped by
+Each refresh token works once. Using it returns a new one in the same family,
+one family per login. Presenting a token that has already been used means it
+was copied, so the whole family is revoked and that login is signed out. This
+is the standard detection for stolen refresh tokens and costs one extra column.
+
+Revocation is checked across the family, not only on the presented row. Two
+requests racing with the same token could otherwise both get through: one is
+rejected and revokes the family while the other is still issuing its
+replacement, which would survive. Checking the family closes that gap, and a
+conditional update makes sure only one of two simultaneous uses can claim a
+token in the first place.
+
+Every route requires a valid access token unless it is explicitly marked
+public, so an endpoint added without thinking about auth fails closed. Login and
+registration are rate limited per client address, which the gateway forwards
+since every request otherwise appears to come from the gateway itself.
+
+In production the cookie needs the web app and the api on the same site, such
+as `app.example.com` and `api.example.com`. Browsers increasingly refuse
+cookies across sites, so a web app on one domain and an api on an unrelated one
+would lose the session on reload.
+
+Passwords are hashed with argon2id. A login for an unknown email still runs a
+hash check against a decoy, so the response time does not reveal which emails
+have accounts. Every monitor query is scoped by
 `userId` in the repository layer, not in the controller, so a forgotten check
 in one endpoint cannot expose another user's data.
 
