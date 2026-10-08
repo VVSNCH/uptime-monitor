@@ -253,23 +253,34 @@ Smaller decisions:
 
 ## 3. Scheduling
 
-Each active monitor owns one BullMQ **repeatable job**, keyed by monitor id,
-with `every` set to its interval. BullMQ holds the schedule in Redis and
-enqueues an occurrence when it is due.
+Each active monitor owns one BullMQ **job scheduler** with the id
+`monitor-<id>` and `every` set to its interval. BullMQ holds the schedule in
+Redis and enqueues an occurrence when it is due. Schedulers are upserted by id,
+so changing an interval replaces the schedule in one call; there is no window
+where a monitor has two schedules or none.
 
 Lifecycle, all handled in the api:
-- Monitor created → add repeatable job, and enqueue one immediate check so the
-  user sees a result at once
-- Interval changed → remove the old repeatable job, add a new one. Removing
-  first is not optional; BullMQ keys repeatables by their options, so changing
-  the interval without removing leaves two schedules running
-- Paused or deleted → remove the repeatable job
-- Startup → reconcile. Read active monitors, read registered repeatables, add
-  what is missing and remove what is orphaned
+- Monitor created → upsert its scheduler. A new scheduler queues its first run
+  straight away, so the user sees a result in seconds rather than after a full
+  interval
+- Interval changed → upsert again with the new interval
+- Paused or deleted → remove the scheduler
+- Resumed → upsert, which again runs a check straight away
+- Startup, and every five minutes after → reconcile. Read active monitors from
+  Postgres and schedulers from Redis; add what is missing, replace what has the
+  wrong interval, remove what has no monitor. A scheduler that is already right
+  is left alone, so reconciling never shifts a monitor's next check
 
-That reconcile step is what makes FR-3.6 true. Redis is treated as a cache of
-the schedule, never as its source of truth; Postgres is the source of truth,
-and the schedule can always be rebuilt from it.
+That reconcile is what makes FR-3.6 true. Redis is treated as a cache of the
+schedule, never as its source of truth; Postgres is, and the schedule can always
+be rebuilt from it. It is also why a failed schedule update is logged rather
+than returned as an error: the monitor change was saved, and the next reconcile
+repairs the schedule within minutes. The one exception is "run a check now",
+which reports a 503 when it cannot be queued, because someone is waiting on it.
+
+The api's queue connection fails fast instead of queueing commands until Redis
+returns. A request that touches the schedule while Redis is down finishes in
+milliseconds with the change saved, rather than hanging.
 
 ### Why not a cron library in the api
 
@@ -467,7 +478,7 @@ signal stops, not when a signal arrives.
 | Failure | Effect | Behaviour |
 |---|---|---|
 | Worker down | No checks run | api and dashboard usable; monitors go stale and render as unknown; external heartbeat stops and raises the alarm |
-| Redis down | No scheduling, no queue, no registry writes | Gateway keeps routing to the last known instances; api serves history; reconcile rebuilds the schedule and services re-register on recovery |
+| Redis down | No scheduling, no queue, no registry writes | Gateway keeps routing to the last known instances; api serves history and still saves monitor changes; "run a check now" returns 503; reconcile rebuilds the schedule and services re-register on recovery |
 | Gateway down | Browser cannot reach anything | api and worker unaffected; checks and alerts continue |
 | api instance crashes | Its registry entry lingers for up to 15 seconds | Requests routed to it get a 502; after expiry the gateway stops sending them there |
 | Postgres down | api returns errors | Dashboard shows a service-unavailable state, not an empty list |
