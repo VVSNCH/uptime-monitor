@@ -9,6 +9,7 @@ export {
   MONITOR_LIMITS,
   MONITOR_STATUS,
   type MonitorStatus,
+  STALE_INTERVAL_MULTIPLIER,
 } from './constants/monitor.js'
 export {
   CHANNEL_TYPE,

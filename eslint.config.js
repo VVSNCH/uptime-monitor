@@ -22,7 +22,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['apps/{api,worker,gateway}/**/*.ts', 'packages/**/*.{ts,js}', '*.js'],
+    files: ['apps/{api,worker,gateway}/**/*.{ts,js}', 'packages/**/*.{ts,js}', '*.js'],
     languageOptions: { globals: globals.node },
   },
   {
