@@ -7,18 +7,23 @@
     "dev": "nest start --watch --preserveWatchOutput",
     "build": "nest build",
     "start": "node dist/main.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-vm-modules --disable-warning=ExperimentalWarning ../../node_modules/jest/bin/jest.js --passWithNoTests"
   },
   "dependencies": {
     "@nestjs/common": "^12.1.2",
     "@nestjs/config": "^12.0.1",
     "@nestjs/core": "^12.1.2",
+    "@nestjs/jwt": "^12.0.2",
     "@nestjs/platform-express": "^12.1.2",
     "@nestjs/swagger": "^12.0.2",
+    "@nestjs/throttler": "^6.7.1",
+    "@node-rs/argon2": "^2.2.1",
     "@uptime/database": "*",
     "@uptime/nest-common": "*",
     "@uptime/service-registry": "*",
     "@uptime/shared": "*",
+    "cookie-parser": "^1.4.7",
     "nestjs-pino": "^5.3.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
@@ -26,6 +31,7 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.8",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6"
   }
 }
