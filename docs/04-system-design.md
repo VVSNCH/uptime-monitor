@@ -421,13 +421,28 @@ which is more than this phase needed.
 Raw `Check` rows are the expensive table: 100 monitors on a one-minute interval
 is 144,000 rows a day. Two mechanisms keep it bounded.
 
-- A nightly job folds yesterday's checks into `DailyStat` per monitor
-- Raw checks older than the retention window — 30 days by default — are deleted
+- At 00:05 UTC a job folds the last three full days of checks into `DailyStat`,
+  one row per monitor per day
+- At 00:20 UTC raw checks from before the retention window — 30 days by
+  default — are deleted, a batch at a time
+
+The rollup recomputes each day and overwrites its row rather than adding to
+it, so running a day twice changes nothing. Looking back three days instead of
+one means a night the worker was down is caught up by the next. Retention can
+not be set below a week, so no day is ever pruned before it has been counted.
+Days are UTC calendar days throughout.
 
 The 90-day uptime bar reads `DailyStat`, which is 90 rows per monitor. The
-response-time chart reads raw checks, which is why its window is limited to the
-retention period. Uptime percentages for 24 hours, 7 days and 30 days come from
-`DailyStat` with the current partial day from raw rows.
+7, 30 and 90-day figures add up those rows; today, and any day the nightly job
+has not reached yet, come from raw checks with the same query the rollup uses.
+The 24-hour figure, and `uptime24h` on the monitor list, read raw checks
+directly, since 24 hours does not line up with calendar days. The
+response-time chart lists raw checks too, a week at most per request.
+
+Every database session runs in UTC. The Postgres driver sends timestamps
+without an offset, so a server in another time zone would store every one of
+them shifted. Prisma reads them back shifted the same way and hides it, but any
+SQL that groups by day would not.
 
 This is the ordinary answer to time-series growth: roll up, then discard. It is
 specified from the start rather than added once the table is already large,

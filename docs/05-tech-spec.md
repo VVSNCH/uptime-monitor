@@ -89,7 +89,8 @@ uptime-monitor/
     │       │   └── monitor-schedule.service.ts
     │       ├── incidents/
     │       ├── channels/
-    │       ├── stats/
+    │       ├── stats/                uptime figures and check history
+    │       ├── history/              reads over checks and daily stats
     │       ├── events/               SSE stream, Redis subscriber
     │       ├── health/
     │       ├── queue/                queue registration and producers
@@ -114,7 +115,9 @@ uptime-monitor/
     │       │   ├── webhook.channel.ts
     │       │   └── templates/
     │       ├── rollup/
-    │       │   └── rollup.processor.ts
+    │       │   ├── rollup.processor.ts       nightly rollup and pruning
+    │       │   ├── rollup.repository.ts
+    │       │   └── rollup.scheduler.ts       registers the two nightly jobs
     │       └── constants/
     └── web/
         └── src/
@@ -169,7 +172,7 @@ export interface MonitorSummary {
   status: MonitorStatus
   lastCheckedAt: string | null      // ISO
   lastResponseMs: number | null
-  uptime24h: number                 // 0..1
+  uptime24h: number | null          // 0..1, null before the first check
 }
 ```
 
@@ -214,8 +217,8 @@ POST   /monitors/:id/pause
 POST   /monitors/:id/resume
 POST   /monitors/:id/check          run one check now: 202, 409 if paused, 503 if it cannot be queued
 
-GET    /monitors/:id/checks?from=&to=
-GET    /monitors/:id/stats?window=24h|7d|30d|90d
+GET    /monitors/:id/checks?from=&to=   oldest first; last 24 hours by default, a week at most
+GET    /monitors/:id/stats?window=24h|7d|30d|90d   uptime and average; one entry per day except 24h
 GET    /incidents?open=true&limit=50     newest first, limit at most 100
 GET    /monitors/:id/incidents          same filters, one monitor
 
@@ -242,7 +245,7 @@ one does not answer.
 |---|---|---|---|
 | `checks` | BullMQ job schedulers, one per monitor; the api for on-demand checks | `{ monitorId, requestedAt? }` | Attempts 1 — retrying a check is meaningless, the next occurrence is the retry. `requestedAt` is set only on on-demand checks; a scheduled check takes its occurrence from the job |
 | `notifications` | worker state machine; api for channel tests | `notify { incidentId, transition }`, `deliver { …, channelId }`, `test-delivery { channelId }` | notify fans out to one deliver per channel; deliver attempts 5, exponential backoff from 10 s |
-| `rollup` | Repeatable, nightly | `{ day }` | Idempotent upsert into DailyStat |
+| `rollup` | Two job schedulers the worker registers on startup | `rollup { day? }`, `prune-checks {}` | rollup at 00:05 UTC overwrites DailyStat for the last three full days, or just `day` if given; prune-checks at 00:20 UTC deletes raw checks past the retention window |
 
 `checks` deliberately does not retry. A failed check is data, not an error. The
 only thing worth retrying is delivery of an alert.
@@ -274,7 +277,7 @@ SMTP_URL                               optional; smtp:// or smtps://user:pass@ho
 ALERT_FROM_EMAIL=alerts@uptime.local
 APP_PUBLIC_URL=http://localhost:5000   linked from every alert
 CHECK_CONCURRENCY=20                    checks one worker runs at once
-RAW_CHECK_RETENTION_DAYS=30
+RAW_CHECK_RETENTION_DAYS=30            at least 7
 HEARTBEAT_URL                        optional; worker pings after each cycle
 LOG_LEVEL=info
 LOG_FORMAT=json                        pretty for local development
