@@ -22,7 +22,12 @@ export {
 } from './constants/notification.js'
 export { JOB_NAMES, QUEUE_NAMES, type QueueName } from './constants/queues.js'
 export { SERVICE_NAMES, type ServiceName } from './constants/services.js'
-export { STATS_WINDOWS, type StatsWindow, UPTIME_HISTORY_DAYS } from './constants/stats.js'
+export {
+  CHECK_HISTORY_MAX_DAYS,
+  STATS_WINDOWS,
+  type StatsWindow,
+  UPTIME_HISTORY_DAYS,
+} from './constants/stats.js'
 export type {
   AuthResponse,
   ChangePasswordRequest,
@@ -36,7 +41,7 @@ export type {
   CreateChannelRequest,
   UpdateChannelRequest,
 } from './dto/channel.js'
-export type { CheckResult } from './dto/check.js'
+export type { CheckHistoryQuery, CheckResult } from './dto/check.js'
 export type { ApiError } from './dto/error.js'
 export type {
   DependencyStatus,
@@ -58,4 +63,4 @@ export type {
   MonitorSummary,
   UpdateMonitorRequest,
 } from './dto/monitor.js'
-export type { DailyUptime, ResponseTimePoint, UptimeStats } from './dto/stats.js'
+export type { DailyUptime, UptimeStats } from './dto/stats.js'

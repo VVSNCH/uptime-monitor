@@ -7,3 +7,8 @@ export interface CheckResult {
   responseMs: number | null
   error: string | null
 }
+
+export interface CheckHistoryQuery {
+  from?: string
+  to?: string
+}
