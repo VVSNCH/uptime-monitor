@@ -16,6 +16,9 @@ export {
   type ChannelType,
   TRANSITION,
   type Transition,
+  WEBHOOK_EVENTS,
+  WEBHOOK_HEADERS,
+  type WebhookEvent,
 } from './constants/notification.js'
 export { JOB_NAMES, QUEUE_NAMES, type QueueName } from './constants/queues.js'
 export { SERVICE_NAMES, type ServiceName } from './constants/services.js'
@@ -42,7 +45,13 @@ export type {
   LivenessResponse,
 } from './dto/health.js'
 export type { IncidentResponse } from './dto/incident.js'
-export type { CheckJob, NotificationJob, RollupJob } from './dto/jobs.js'
+export type {
+  CheckJob,
+  DeliveryJob,
+  NotificationJob,
+  RollupJob,
+  TestDeliveryJob,
+} from './dto/jobs.js'
 export type {
   CreateMonitorRequest,
   MonitorDetail,

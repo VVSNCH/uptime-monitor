@@ -7,9 +7,19 @@ export interface CheckJob {
   requestedAt?: string
 }
 
+// One per status change. The worker turns it into one DeliveryJob per channel,
+// so each channel retries on its own.
 export interface NotificationJob {
   incidentId: number
   transition: Transition
+}
+
+export interface DeliveryJob extends NotificationJob {
+  channelId: number
+}
+
+export interface TestDeliveryJob {
+  channelId: number
 }
 
 export interface RollupJob {

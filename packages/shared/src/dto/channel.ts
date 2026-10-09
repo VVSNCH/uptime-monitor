@@ -7,6 +7,8 @@ export interface ChannelResponse {
   enabled: boolean
   sendOnDown: boolean
   sendOnRecover: boolean
+  /** Webhook channels only: the key that signs each delivery. */
+  signingSecret: string | null
   createdAt: string
 }
 

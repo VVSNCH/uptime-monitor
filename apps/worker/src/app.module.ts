@@ -4,8 +4,10 @@ import { PrismaModule } from '@uptime/database/nest'
 import { CommonModule } from '@uptime/nest-common'
 import { ServiceRegistryModule } from '@uptime/service-registry/nest'
 
+import { CheckModule } from './check/check.module.js'
 import { validateEnv } from './config/env.js'
 import { HealthModule } from './health/health.module.js'
+import { NotifyModule } from './notify/notify.module.js'
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { HealthModule } from './health/health.module.js'
     ServiceRegistryModule.forRoot(),
     CommonModule,
     HealthModule,
+    CheckModule,
+    NotifyModule,
   ],
 })
 export class AppModule {}

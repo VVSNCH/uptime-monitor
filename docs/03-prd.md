@@ -66,6 +66,10 @@ A dialog. Name, URL, method, interval as a select, timeout, expected status.
 Validation is immediate and specific — a bad URL says what is wrong with it,
 not "invalid".
 
+The interval defaults to 5 minutes. One minute stays available, but as a
+deliberate choice for the endpoints that matter most rather than the default
+for everything.
+
 ### S-4 Monitor detail
 The screen a user opens during an outage, so the current state comes first:
 - Header: current status, uptime for 24 hours, 7 days and 30 days
@@ -138,6 +142,11 @@ would read as "everything is fine".
 Public status pages, team accounts, maintenance windows, SSL expiry checks,
 multi-region probes, escalation, SMS, response-body assertions. Each was
 considered and left out on purpose.
+
+The first candidate for later is the heartbeat monitor: instead of us visiting
+a URL, a scheduled job or background service pings us when it runs, and an
+alert fires when the pings stop. It covers things that have no URL to visit,
+such as nightly backups.
 
 ## 9. Acceptance
 

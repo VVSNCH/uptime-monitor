@@ -9,6 +9,10 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   LOG_FORMAT: z.enum(['json', 'pretty']).default('json'),
   ALLOW_PRIVATE_TARGETS: z.stringbool().default(false),
+  CHECK_CONCURRENCY: z.coerce.number().int().positive().default(20),
+  SMTP_URL: z.preprocess((value) => (value === '' ? undefined : value), z.url().optional()),
+  ALERT_FROM_EMAIL: z.email().default('alerts@uptime.local'),
+  APP_PUBLIC_URL: z.url().default('http://localhost:5000'),
 })
 
 export type Env = z.infer<typeof envSchema>
