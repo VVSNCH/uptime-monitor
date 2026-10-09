@@ -16,7 +16,11 @@ import type { Env } from '../config/env.js'
         return { connection: { url, maxRetriesPerRequest: null } }
       },
     }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.checks }, { name: QUEUE_NAMES.notifications }),
+    BullModule.registerQueue(
+      { name: QUEUE_NAMES.checks },
+      { name: QUEUE_NAMES.notifications },
+      { name: QUEUE_NAMES.rollup },
+    ),
   ],
   exports: [BullModule],
 })

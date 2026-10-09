@@ -1,9 +1,12 @@
 import { PrismaPg } from '@prisma/adapter-pg'
 
 import { PrismaClient } from './generated/prisma/client.js'
+import { SESSION_OPTIONS } from './session.js'
 
 export * from './generated/prisma/client.js'
 
 export function createPrismaClient(connectionString: string): PrismaClient {
-  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) })
+  return new PrismaClient({
+    adapter: new PrismaPg({ connectionString, options: SESSION_OPTIONS }),
+  })
 }

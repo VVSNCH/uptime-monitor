@@ -10,6 +10,9 @@ import {
   type UpdateMonitorRequest,
 } from '@uptime/shared'
 
+import { MS_PER_DAY } from '../constants/index.js'
+import { HistoryRepository } from '../history/history.repository.js'
+import { summarize } from '../stats/stats.calculator.js'
 import { toMonitorDetail, toMonitorSummary } from './monitor.mapper.js'
 import { MonitorScheduleService } from './monitor-schedule.service.js'
 import { MonitorsRepository } from './monitors.repository.js'
@@ -21,16 +24,22 @@ export class MonitorsService {
   constructor(
     @Inject(MonitorsRepository) private readonly monitors: MonitorsRepository,
     @Inject(MonitorScheduleService) private readonly schedule: MonitorScheduleService,
+    @Inject(HistoryRepository) private readonly history: HistoryRepository,
   ) {}
 
+  // One grouped query for the whole list, not one per monitor.
   async list(userId: number): Promise<MonitorSummary[]> {
     const now = new Date()
     const monitors = await this.monitors.listForUser(userId)
-    return monitors.map((monitor) => toMonitorSummary(monitor, now))
+    const uptime = await this.uptime24h(
+      monitors.map((monitor) => monitor.id),
+      now,
+    )
+    return monitors.map((monitor) => toMonitorSummary(monitor, now, uptime(monitor.id)))
   }
 
   async get(userId: number, id: number): Promise<MonitorDetail> {
-    return toMonitorDetail(requireFound(await this.monitors.findForUser(userId, id)), new Date())
+    return this.toDetail(requireFound(await this.monitors.findForUser(userId, id)))
   }
 
   async create(userId: number, request: CreateMonitorRequest): Promise<MonitorDetail> {
@@ -52,7 +61,7 @@ export class MonitorsService {
   async update(userId: number, id: number, request: UpdateMonitorRequest): Promise<MonitorDetail> {
     const monitor = requireFound(await this.monitors.updateForUser(userId, id, request))
     await this.schedule.sync(monitor)
-    return toMonitorDetail(monitor, new Date())
+    return this.toDetail(monitor)
   }
 
   async remove(userId: number, id: number): Promise<void> {
@@ -66,7 +75,7 @@ export class MonitorsService {
       await this.monitors.updateForUser(userId, id, { paused: isPaused }),
     )
     await this.schedule.sync(monitor)
-    return toMonitorDetail(monitor, new Date())
+    return this.toDetail(monitor)
   }
 
   async checkNow(userId: number, id: number): Promise<void> {
@@ -79,6 +88,20 @@ export class MonitorsService {
       )
     }
     await this.schedule.runNow(monitor.id)
+  }
+
+  private async toDetail(monitor: Monitor): Promise<MonitorDetail> {
+    const now = new Date()
+    const uptime = await this.uptime24h([monitor.id], now)
+    return toMonitorDetail(monitor, now, uptime(monitor.id))
+  }
+
+  private async uptime24h(ids: number[], now: Date): Promise<(id: number) => number | null> {
+    const totals = await this.history.totalsSince(ids, new Date(now.getTime() - MS_PER_DAY))
+    return (id) => {
+      const found = totals.get(id)
+      return summarize(found ? [found] : []).uptime
+    }
   }
 }
 

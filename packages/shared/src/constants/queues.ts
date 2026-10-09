@@ -11,4 +11,6 @@ export const JOB_NAMES = {
   notify: 'notify',
   deliver: 'deliver',
   testDelivery: 'test-delivery',
+  rollup: 'rollup',
+  pruneChecks: 'prune-checks',
 } as const

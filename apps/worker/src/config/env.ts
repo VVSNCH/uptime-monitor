@@ -13,6 +13,9 @@ const envSchema = z.object({
   SMTP_URL: z.preprocess((value) => (value === '' ? undefined : value), z.url().optional()),
   ALERT_FROM_EMAIL: z.email().default('alerts@uptime.local'),
   APP_PUBLIC_URL: z.url().default('http://localhost:5000'),
+  // At least a week, well past how far back the rollup looks, so no day is
+  // pruned before it has been counted.
+  RAW_CHECK_RETENTION_DAYS: z.coerce.number().int().min(7).default(30),
 })
 
 export type Env = z.infer<typeof envSchema>

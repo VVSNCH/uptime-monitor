@@ -22,7 +22,11 @@ export function isStale(monitor: Monitor, now: Date): boolean {
   return now.getTime() - lastActivity.getTime() > allowedMs
 }
 
-export function toMonitorSummary(monitor: Monitor, now: Date): MonitorSummary {
+export function toMonitorSummary(
+  monitor: Monitor,
+  now: Date,
+  uptime24h: number | null = null,
+): MonitorSummary {
   return {
     id: monitor.id,
     name: monitor.name,
@@ -31,13 +35,17 @@ export function toMonitorSummary(monitor: Monitor, now: Date): MonitorSummary {
     isStale: isStale(monitor, now),
     lastCheckedAt: monitor.lastCheckedAt?.toISOString() ?? null,
     lastResponseMs: monitor.lastResponseMs,
-    uptime24h: null,
+    uptime24h,
   }
 }
 
-export function toMonitorDetail(monitor: Monitor, now: Date): MonitorDetail {
+export function toMonitorDetail(
+  monitor: Monitor,
+  now: Date,
+  uptime24h: number | null = null,
+): MonitorDetail {
   return {
-    ...toMonitorSummary(monitor, now),
+    ...toMonitorSummary(monitor, now, uptime24h),
     method: asHttpMethod(monitor.method),
     intervalSeconds: asCheckInterval(monitor.intervalSeconds),
     timeoutMs: monitor.timeoutMs,

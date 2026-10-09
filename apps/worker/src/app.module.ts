@@ -8,6 +8,7 @@ import { CheckModule } from './check/check.module.js'
 import { validateEnv } from './config/env.js'
 import { HealthModule } from './health/health.module.js'
 import { NotifyModule } from './notify/notify.module.js'
+import { RollupModule } from './rollup/rollup.module.js'
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { NotifyModule } from './notify/notify.module.js'
     HealthModule,
     CheckModule,
     NotifyModule,
+    RollupModule,
   ],
 })
 export class AppModule {}

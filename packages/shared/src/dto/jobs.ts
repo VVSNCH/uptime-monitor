@@ -22,6 +22,8 @@ export interface TestDeliveryJob {
   channelId: number
 }
 
+// Without a day, the nightly run folds the last few full days, so one missed
+// night is caught up by the next.
 export interface RollupJob {
-  day: string
+  day?: string
 }
