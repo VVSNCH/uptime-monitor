@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { PrismaPg } from '@prisma/adapter-pg'
 
 import { PrismaClient } from '../generated/prisma/client.js'
+import { SESSION_OPTIONS } from '../session.js'
 
 const CONNECTION_TIMEOUT_MS = 5_000
 const DEFAULT_POOL_SIZE = 10
@@ -15,6 +16,7 @@ export class PrismaService extends PrismaClient implements OnModuleDestroy {
         connectionString: config.getOrThrow<string>('DATABASE_URL'),
         connectionTimeoutMillis: CONNECTION_TIMEOUT_MS,
         max: config.get<number>('DATABASE_POOL_SIZE') ?? DEFAULT_POOL_SIZE,
+        options: SESSION_OPTIONS,
       }),
     })
   }
