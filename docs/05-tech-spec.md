@@ -101,10 +101,13 @@ uptime-monitor/
     │       ├── main.ts
     │       ├── app.module.ts
     │       ├── check/
-    │       │   ├── check.processor.ts
+    │       │   ├── check.processor.ts        BullMQ consumer, bounded concurrency
+    │       │   ├── check-runner.service.ts   load, claim, probe, record
+    │       │   ├── check.repository.ts       the claim and the result write
     │       │   ├── http-probe.service.ts
     │       │   ├── url-guard.service.ts
     │       │   └── state-machine.service.ts
+    │       ├── queue/                        BullMQ connection for consuming
     │       ├── notify/
     │       │   ├── notify.processor.ts
     │       │   ├── email.channel.ts
@@ -213,14 +216,14 @@ POST   /monitors/:id/check          run one check now: 202, 409 if paused, 503 i
 
 GET    /monitors/:id/checks?from=&to=
 GET    /monitors/:id/stats?window=24h|7d|30d|90d
-GET    /incidents?open=true
-GET    /monitors/:id/incidents
+GET    /incidents?open=true&limit=50     newest first, limit at most 100
+GET    /monitors/:id/incidents          same filters, one monitor
 
 GET    /channels
 POST   /channels
 PATCH  /channels/:id
 DELETE /channels/:id
-POST   /channels/:id/test
+POST   /channels/:id/test               sends a real sample, returns what the receiver said
 
 GET    /events                      SSE stream
 ```
@@ -238,7 +241,7 @@ one does not answer.
 | Queue | Producer | Job data | Notes |
 |---|---|---|---|
 | `checks` | BullMQ job schedulers, one per monitor; the api for on-demand checks | `{ monitorId, requestedAt? }` | Attempts 1 — retrying a check is meaningless, the next occurrence is the retry. `requestedAt` is set only on on-demand checks; a scheduled check takes its occurrence from the job |
-| `notifications` | worker state machine | `{ incidentId, transition }` | Attempts 5, exponential backoff |
+| `notifications` | worker state machine; api for channel tests | `notify { incidentId, transition }`, `deliver { …, channelId }`, `test-delivery { channelId }` | notify fans out to one deliver per channel; deliver attempts 5, exponential backoff from 10 s |
 | `rollup` | Repeatable, nightly | `{ day }` | Idempotent upsert into DailyStat |
 
 `checks` deliberately does not retry. A failed check is data, not an error. The
@@ -267,10 +270,10 @@ REFRESH_TOKEN_TTL_DAYS=30
 COOKIE_SECURE=true                     false only for local http
 COOKIE_SAME_SITE=lax
 REFRESH_COOKIE_PATH=/api/v1/auth
-SMTP_URL
-ALERT_FROM_EMAIL
-APP_PUBLIC_URL
-CHECK_CONCURRENCY=20
+SMTP_URL                               optional; smtp:// or smtps://user:pass@host:port
+ALERT_FROM_EMAIL=alerts@uptime.local
+APP_PUBLIC_URL=http://localhost:5000   linked from every alert
+CHECK_CONCURRENCY=20                    checks one worker runs at once
 RAW_CHECK_RETENTION_DAYS=30
 HEARTBEAT_URL                        optional; worker pings after each cycle
 LOG_LEVEL=info
