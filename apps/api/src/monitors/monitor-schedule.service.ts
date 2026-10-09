@@ -16,11 +16,11 @@ import {
   MONITOR_SCHEDULER_PREFIX,
   SCHEDULE_RECONCILE_INTERVAL_MS,
 } from '../constants/index.js'
+import { withTimeout } from '../queue/with-timeout.js'
 import { MonitorsRepository } from './monitors.repository.js'
 
 const MS_PER_SECOND = 1_000
 const QUEUE_ERROR_LOG_INTERVAL_MS = 60_000
-const QUEUE_OPERATION_TIMEOUT_MS = 2_000
 
 export interface SchedulableMonitor {
   id: number
@@ -165,17 +165,6 @@ export class MonitorScheduleService implements OnApplicationBootstrap, OnApplica
       ),
     )
   }
-}
-
-function withTimeout<T>(operation: Promise<T>): Promise<T> {
-  let timer: NodeJS.Timeout | undefined
-  const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(
-      () => reject(new Error('Timed out waiting for Redis')),
-      QUEUE_OPERATION_TIMEOUT_MS,
-    )
-  })
-  return Promise.race([operation, timeout]).finally(() => clearTimeout(timer))
 }
 
 function schedulerId(monitorId: number): string {

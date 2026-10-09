@@ -19,7 +19,7 @@ import type { Env } from '../config/env.js'
         return { connection: { url, enableOfflineQueue: false } }
       },
     }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.checks }),
+    BullModule.registerQueue({ name: QUEUE_NAMES.checks }, { name: QUEUE_NAMES.notifications }),
   ],
   exports: [BullModule],
 })
