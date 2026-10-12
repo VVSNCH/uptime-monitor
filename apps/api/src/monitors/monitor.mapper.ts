@@ -36,6 +36,7 @@ export function toMonitorSummary(
     lastCheckedAt: monitor.lastCheckedAt?.toISOString() ?? null,
     lastResponseMs: monitor.lastResponseMs,
     uptime24h,
+    isSeeded: monitor.isSeeded,
   }
 }
 

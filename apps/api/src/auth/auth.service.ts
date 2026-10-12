@@ -88,6 +88,15 @@ export class AuthService {
     { currentPassword, newPassword }: ChangePasswordRequest,
   ): Promise<Session> {
     const user = await this.users.findById(userId)
+    // Everyone trying the app shares the demo account, so one visitor must
+    // not be able to lock the rest out.
+    if (user?.isDemo) {
+      throw new AppException(
+        HttpStatus.FORBIDDEN,
+        ERROR_CODES.forbidden,
+        'The demo account’s password cannot be changed',
+      )
+    }
     const isValid = user ? await this.passwords.verify(user.passwordHash, currentPassword) : false
     if (!user || !isValid) {
       throw new AppException(

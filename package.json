@@ -21,6 +21,7 @@
     "db:migrate:dev": "npm run migrate:dev -w @uptime/database",
     "db:migrate:test": "npm run migrate:test -w @uptime/database",
     "db:studio": "npm run studio -w @uptime/database",
+    "seed": "npm run build:packages && npm run build -w @uptime/api && npm run seed -w @uptime/api",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
