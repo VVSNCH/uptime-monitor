@@ -9,6 +9,7 @@ export interface MonitorSummary {
   lastCheckedAt: string | null
   lastResponseMs: number | null
   uptime24h: number | null
+  isSeeded: boolean
 }
 
 export interface MonitorDetail extends MonitorSummary {
