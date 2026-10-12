@@ -11,7 +11,7 @@ export function createValidationPipe(): ValidationPipe {
       new AppException(
         HttpStatus.BAD_REQUEST,
         ERROR_CODES.validationFailed,
-        collectMessages(errors).join('; '),
+        [...new Set(collectMessages(errors))].join('; '),
       ),
   })
 }

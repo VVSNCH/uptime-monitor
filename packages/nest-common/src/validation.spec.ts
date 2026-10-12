@@ -49,4 +49,19 @@ describe('createValidationPipe', () => {
       message: 'email must be an email; retries must not be less than 1',
     })
   })
+
+  it('says a message once when several rules on a field share it', async () => {
+    const message = 'retries must be a whole number of at least 1'
+    class Shared {
+      @IsInt({ message })
+      @Min(1, { message })
+      retries!: number
+    }
+
+    const error: unknown = await pipe
+      .transform({ retries: 'many' }, { type: 'body', metatype: Shared })
+      .catch((caught: unknown) => caught)
+
+    expect((error as AppException).toApiError().message).toBe(message)
+  })
 })

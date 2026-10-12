@@ -1,4 +1,5 @@
 export { PASSWORD_RULES } from './constants/auth.js'
+export { DEMO_ACCOUNT, DEMO_TARGET_MODES, type DemoTargetMode } from './constants/demo.js'
 export { ERROR_CODES, type ErrorCode } from './constants/errors.js'
 export {
   ALLOWED_URL_PROTOCOLS,
@@ -42,6 +43,7 @@ export type {
   UpdateChannelRequest,
 } from './dto/channel.js'
 export type { CheckHistoryQuery, CheckResult } from './dto/check.js'
+export type { DemoTargetState, SetDemoTargetRequest } from './dto/demo.js'
 export type { ApiError } from './dto/error.js'
 export type {
   DependencyStatus,

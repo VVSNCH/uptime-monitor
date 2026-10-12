@@ -19,6 +19,8 @@ export class MonitorSummaryDto implements MonitorSummary {
   lastResponseMs!: number | null
   /** Fraction between 0 and 1, or null until there is history. */
   uptime24h!: number | null
+  /** True for demo monitors whose history before today was generated, not measured. */
+  isSeeded!: boolean
 }
 
 export class MonitorDetailDto extends MonitorSummaryDto implements MonitorDetail {

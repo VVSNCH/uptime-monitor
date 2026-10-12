@@ -114,5 +114,23 @@ describe('AuthService', () => {
         auth.login({ email: 'ada@example.com', password: 'a new long password' }),
       ).resolves.toBeDefined()
     })
+
+    it('refuses to change the shared demo account’s password', async () => {
+      const { response } = await auth.register({ email: 'demo@example.com', password: PASSWORD })
+      const demo = users.rows[0]
+      if (demo) demo.isDemo = true
+
+      const error = await captureError(
+        auth.changePassword(response.user.id, {
+          currentPassword: PASSWORD,
+          newPassword: 'a new long password',
+        }),
+      )
+
+      expect(error.toApiError()).toMatchObject({ statusCode: 403, code: ERROR_CODES.forbidden })
+      await expect(
+        auth.login({ email: 'demo@example.com', password: PASSWORD }),
+      ).resolves.toBeDefined()
+    })
   })
 })
