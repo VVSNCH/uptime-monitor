@@ -105,15 +105,18 @@ export default defineConfig(
       'check-file/filename-naming-convention': [
         'error',
         {
-          'apps/web/src/{components,routes}/**/!(index).{ts,tsx}': 'PASCAL_CASE',
-          'apps/web/src/theme/*.tsx': 'PASCAL_CASE',
-          'apps/web/src/{hooks,services,constants,types,theme}/**/*.ts': 'CAMEL_CASE',
+          'apps/web/src/{components,routes,pages}/**/!(index).{ts,tsx}': 'PASCAL_CASE',
+          'apps/web/src/{theme,context}/*.tsx': 'PASCAL_CASE',
+          'apps/web/src/{hooks,services,constants,types,theme,context}/**/*.ts': 'CAMEL_CASE',
         },
         { ignoreMiddleExtensions: true },
       ],
       'check-file/folder-naming-convention': [
         'error',
-        { 'apps/web/src/components/*/': 'PASCAL_CASE' },
+        {
+          'apps/web/src/components/*/': 'PASCAL_CASE',
+          'apps/web/src/pages/*/': 'PASCAL_CASE',
+        },
       ],
     },
   },
