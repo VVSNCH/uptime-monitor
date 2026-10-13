@@ -88,7 +88,7 @@ delete. The test action sends a real sample payload and reports what came back
 — a channel you have not tested is a channel you do not have.
 
 ### S-7 Settings
-Four things, each already present in the system rather than invented for the
+Five things, each already present in the system rather than invented for the
 screen:
 
 - **Account** — the signed-in email, shown but not editable in v1
@@ -96,10 +96,10 @@ screen:
   as registration. On success, a notice that other sessions have been signed out
 - **Sessions** — "Sign out of all devices", with a confirmation. Useful on its
   own and the visible face of refresh-token revocation
+- **Appearance** — light, dark, or follow the operating system, which is the
+  default. Also one click away in the top bar. Stored in the browser
 - **Timezone** — a toggle between UTC and local time for every timestamp in the
   interface. Stored in the browser, because it changes nothing on the server
-
-No theme switch in v1. The interface follows the operating system.
 
 ## 5. Notification content
 

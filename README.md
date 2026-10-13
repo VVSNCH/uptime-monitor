@@ -9,7 +9,7 @@ Work in progress.
 ## Stack
 
 - **gateway**, **api** and **worker**: NestJS, PostgreSQL via Prisma, BullMQ over Redis
-- **web**: Vite, React, MUI, Recharts
+- **web**: Vite, React, MUI and MUI X Charts, styled-components, React Query
 - **shared**: request and response types used by both sides
 
 One npm workspaces monorepo:
@@ -63,6 +63,33 @@ npm run db:migrate:test
 The api (3001) and worker (3002) are internal. The browser only ever talks to
 the gateway.
 
+## Demo account
+
+`npm run seed` (with `DEMO_SEED_ENABLED=true`) creates `demo@example.com`,
+password `try-the-demo`, and replaces it if it already exists.
+
+| Monitor         | History                                                     |
+| --------------- | ----------------------------------------------------------- |
+| Marketing site  | Seeded: 90 days generated, then checked for real            |
+| Customer portal | Seeded: 90 days generated, then checked for real            |
+| Public API      | Seeded: 90 days generated, then checked for real            |
+| Legacy reports  | Seeded, with an incident left open; its host never resolves |
+| Demo target     | Live: no history until it is checked                        |
+
+Everything before the seed ran is generated, not measured, and the api marks
+those monitors with `isSeeded`. "Demo target" checks the api's own
+`/demo/target`, which can be switched to fail on cue:
+
+```sh
+curl -X POST http://localhost:3000/api/v1/demo/target \
+  -H "Authorization: Bearer <token>" -H "Content-Type: application/json" \
+  -d '{"mode":"down"}'
+```
+
+Modes are `up`, `down` (503), `timeout`, and `status` with a `statusCode`.
+Locally the worker needs `ALLOW_PRIVATE_TARGETS=true` to check it, since it is
+on localhost.
+
 ## Scripts
 
 | Command                   | What it does                            |
@@ -75,5 +102,6 @@ the gateway.
 | `npm run db:migrate:dev`  | Creates a migration from schema changes |
 | `npm run db:migrate:test` | Applies migrations to the test database |
 | `npm run db:studio`       | Opens Prisma Studio                     |
+| `npm run seed`            | Recreates the demo account              |
 | `npm run lint`            | ESLint across the repo                  |
 | `npm run format`          | Prettier across the repo                |

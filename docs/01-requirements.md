@@ -49,7 +49,7 @@ Decided, and not open for revisit during implementation.
 | Queue | BullMQ over Redis |
 | Auth | JWT access token plus rotating refresh token, argon2 password hashing |
 | Frontend | Vite, React, TypeScript, MUI, styled-components, React Router |
-| Charts | Recharts |
+| Charts | MUI X Charts |
 | Email | SMTP through Nodemailer, provider-agnostic |
 | Deployment | Docker Compose locally; gateway, api, worker, Postgres and Redis on Railway or Fly; web as a static build |
 | Tests | Jest for backend, Vitest for frontend |
