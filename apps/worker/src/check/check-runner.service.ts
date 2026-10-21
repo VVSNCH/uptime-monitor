@@ -10,6 +10,7 @@ export type CheckOutcome =
   | { status: 'duplicate' }
   | {
       status: 'recorded'
+      userId: number
       result: ProbeResult
       monitorStatus: MonitorStatus
       transition: Transition | null
@@ -46,6 +47,7 @@ export class CheckRunner {
 
     return {
       status: 'recorded',
+      userId: monitor.userId,
       result,
       monitorStatus: recorded.evaluation.status,
       transition: recorded.evaluation.transition,

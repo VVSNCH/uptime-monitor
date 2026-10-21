@@ -7,6 +7,7 @@ import { ServiceRegistryModule } from '@uptime/service-registry/nest'
 import { CheckModule } from './check/check.module.js'
 import { validateEnv } from './config/env.js'
 import { HealthModule } from './health/health.module.js'
+import { HeartbeatModule } from './heartbeat/heartbeat.module.js'
 import { NotifyModule } from './notify/notify.module.js'
 import { RollupModule } from './rollup/rollup.module.js'
 
@@ -24,6 +25,7 @@ import { RollupModule } from './rollup/rollup.module.js'
     CheckModule,
     NotifyModule,
     RollupModule,
+    HeartbeatModule,
   ],
 })
 export class AppModule {}

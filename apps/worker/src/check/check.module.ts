@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 
+import { LiveModule } from '../live/live.module.js'
 import { NotifyModule } from '../notify/notify.module.js'
 import { OutboundModule } from '../outbound/outbound.module.js'
 import { QueueModule } from '../queue/queue.module.js'
@@ -10,7 +11,7 @@ import { HttpProbeService } from './http-probe.service.js'
 import { StateMachineService } from './state-machine.service.js'
 
 @Module({
-  imports: [QueueModule, OutboundModule, NotifyModule],
+  imports: [QueueModule, OutboundModule, NotifyModule, LiveModule],
   providers: [HttpProbeService, StateMachineService, CheckRepository, CheckRunner, CheckProcessor],
 })
 export class CheckModule {}

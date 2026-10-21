@@ -7,6 +7,7 @@ import type { Evaluation, MonitorState } from './state-machine.service.js'
 
 export interface MonitorToCheck {
   id: number
+  userId: number
   url: string
   method: string
   timeoutMs: number
@@ -30,6 +31,7 @@ export class CheckRepository {
       where: { id },
       select: {
         id: true,
+        userId: true,
         url: true,
         method: true,
         timeoutMs: true,
