@@ -5,6 +5,8 @@ import { type CheckJob, QUEUE_NAMES, type Transition } from '@uptime/shared'
 import type { Job } from 'bullmq'
 
 import type { Env } from '../config/env.js'
+import { LiveEventPublisher } from '../live/live-event.publisher.js'
+import { liveEventsFor } from '../live/live-events.js'
 import { NotificationProducer } from '../notify/notification.producer.js'
 import { type CheckOutcome, CheckRunner } from './check-runner.service.js'
 
@@ -26,6 +28,7 @@ export class CheckProcessor extends WorkerHost implements OnModuleInit {
     @Inject(CheckRunner) private readonly runner: CheckRunner,
     @Inject(ConfigService) private readonly config: ConfigService<Env, true>,
     @Inject(NotificationProducer) private readonly notifications: NotificationProducer,
+    @Inject(LiveEventPublisher) private readonly live: LiveEventPublisher,
   ) {
     super()
   }
@@ -44,6 +47,7 @@ export class CheckProcessor extends WorkerHost implements OnModuleInit {
       this.logger.log(`Monitor ${job.data.monitorId} is now ${outcome.monitorStatus}${reason}`)
       if (outcome.incidentId !== null) await this.alert(outcome.incidentId, outcome.transition)
     }
+    await this.live.publish(liveEventsFor(job.data.monitorId, outcome))
     return outcome
   }
 

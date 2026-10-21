@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module.js'
 import { ChannelsModule } from './channels/channels.module.js'
 import { validateEnv } from './config/env.js'
 import { DemoModule } from './demo/demo.module.js'
+import { EventsModule } from './events/events.module.js'
 import { HealthModule } from './health/health.module.js'
 import { IncidentsModule } from './incidents/incidents.module.js'
 import { MonitorsModule } from './monitors/monitors.module.js'
@@ -30,6 +31,7 @@ import { StatsModule } from './stats/stats.module.js'
     ChannelsModule,
     StatsModule,
     DemoModule,
+    EventsModule,
   ],
 })
 export class AppModule {}

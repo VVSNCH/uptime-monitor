@@ -1,6 +1,7 @@
 export { PASSWORD_RULES } from './constants/auth.js'
 export { DEMO_ACCOUNT, DEMO_TARGET_MODES, type DemoTargetMode } from './constants/demo.js'
 export { ERROR_CODES, type ErrorCode } from './constants/errors.js'
+export { LIVE_EVENT_TYPES, LIVE_EVENTS_CHANNEL, type LiveEventType } from './constants/events.js'
 export {
   ALLOWED_URL_PROTOCOLS,
   CHECK_INTERVALS_SECONDS,
@@ -45,6 +46,7 @@ export type {
 export type { CheckHistoryQuery, CheckResult } from './dto/check.js'
 export type { DemoTargetState, SetDemoTargetRequest } from './dto/demo.js'
 export type { ApiError } from './dto/error.js'
+export type { LiveEvent, PublishedLiveEvent } from './dto/events.js'
 export type {
   DependencyStatus,
   GatewayHealthResponse,

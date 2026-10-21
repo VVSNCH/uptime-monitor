@@ -122,7 +122,7 @@ specification.
 - FR-7.2 A monitor whose last check is older than three of its own intervals is treated as stale.
 - FR-7.3 Stale monitors render as unknown rather than keeping their last known status.
 - FR-7.4 The dashboard shows how long ago checks last ran when any monitor is stale.
-- FR-7.5 The worker sends a heartbeat to an external endpoint after each successful cycle, so that total failure of this system is detectable from outside it.
+- FR-7.5 The worker sends a heartbeat to an external endpoint every minute while it can reach its database and queue, so that total failure of this system is detectable from outside it.
 
 ### FR-8 Dashboard
 - FR-8.1 All monitors are listed with current status, last checked time and latest response time.

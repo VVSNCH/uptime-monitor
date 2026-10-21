@@ -20,3 +20,9 @@ export const PRUNE_CRON = '20 0 * * *'
 export const ROLLUP_LOOKBACK_DAYS = 3
 export const PRUNE_BATCH_SIZE = 10_000
 export const FINISHED_ROLLUP_JOBS_KEPT = 30
+
+export const REDIS_COMMAND_TIMEOUT_MS = 2_000
+export const LIVE_EVENT_ERROR_LOG_INTERVAL_MS = 60_000
+
+export const HEARTBEAT_INTERVAL_MS = 60_000
+export const HEARTBEAT_TIMEOUT_MS = 10_000

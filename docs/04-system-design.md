@@ -64,9 +64,10 @@ routing to ones that were healthy a moment ago.
 The worker registers too, although nothing is routed to it. Its entry is how
 the gateway's health endpoint can say whether a worker is running at all.
 
-Proxied requests time out after 30 seconds. The SSE stream in section 9 is the
-one route that must be exempt, since it is meant to stay open, and it must also
-be flushed past compression so events are not held in a buffer.
+Proxied requests time out after 30 seconds of silence. The SSE stream in
+section 9 is meant to stay open, so the api pings every stream every 15
+seconds, well inside that limit. The gateway also leaves event streams
+uncompressed, since compression would hold events back until a buffer filled.
 
 Redis was chosen over Consul or etcd because it is already a dependency. A
 second piece of infrastructure to answer "which instances are alive" is not
@@ -493,9 +494,24 @@ Server-sent events from api to browser, one stream per authenticated user,
 carrying status changes only. SSE rather than WebSockets because the traffic is
 one-directional and SSE reconnects by itself.
 
-The worker does not hold the stream. It publishes to a Redis channel; api
-instances subscribe and forward to their connected clients. Falls back to
-polling on a 30-second interval if the stream cannot be established.
+The worker does not hold the stream. After each recorded check it publishes to
+a Redis channel; every api instance subscribes, and each open stream keeps only
+its own user's events, so a browser can be connected to any instance. Events
+say what changed — `monitor.checked`, `incident.opened`, `incident.closed`, with
+a monitor id — not the new data. The dashboard refetches what it is showing,
+batching a second of events into one round of requests, so the stream never
+has to keep every view in step.
+
+Publishing is best effort. If Redis is away, the event is dropped rather than
+delaying the check, and the dashboard's one-minute poll catches up. That poll
+stays on even while the stream is healthy: when the worker dies no events
+arrive at all, and only a refetch reveals that monitors have gone stale.
+
+The browser reads the stream with `fetch` rather than `EventSource`, because
+`EventSource` cannot send the access token in a header and putting it in the
+URL would leave it in logs. The client reconnects with a growing delay,
+renews the token on a 401, and treats 45 seconds without even a ping as a dead
+connection. The top bar shows whether updates are live.
 
 ## 10. Knowing this system is broken
 
@@ -517,9 +533,11 @@ Three intervals rather than one, because a single missed occurrence is normal
 under load and alerting on it would reintroduce exactly the noise the failure
 threshold exists to prevent.
 
-**A heartbeat, from the outside.** The worker pings an external endpoint after
-each successful cycle. If the pings stop, that external service raises the
-alarm. This is the only mechanism that survives total failure of this system,
+**A heartbeat, from the outside.** Every minute the worker pings
+`HEARTBEAT_URL`, an endpoint at a service such as healthchecks.io or Better
+Stack, but only while it can reach both Postgres and Redis, so a worker that
+cannot do its job goes quiet too. If the pings stop, that external service
+raises the alarm. This is the only mechanism that survives total failure of this system,
 including the api, and the reason is structural: nothing inside a system can
 report that the system is down. Something outside has to notice an absence.
 

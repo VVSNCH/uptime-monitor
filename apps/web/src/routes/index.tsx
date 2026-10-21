@@ -1,6 +1,6 @@
 import { createBrowserRouter, Outlet } from 'react-router'
 
-import { AccountMenu, AppShell, ThemeModeMenu } from '../components'
+import { AccountMenu, AppShell, LiveIndicator, ThemeModeMenu } from '../components'
 import { NAV_ITEMS, ROUTES } from '../constants/navigation'
 import { LoginPage } from '../pages/LoginPage/LoginPage'
 import { RegisterPage } from '../pages/RegisterPage/RegisterPage'
@@ -30,6 +30,7 @@ export const router = createBrowserRouter([
                 navItems={NAV_ITEMS}
                 actions={
                   <>
+                    <LiveIndicator />
                     <ThemeModeMenu />
                     <AccountMenu />
                   </>

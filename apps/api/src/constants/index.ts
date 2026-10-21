@@ -19,5 +19,10 @@ export const CHANNEL_TEST_TIMEOUT_MS = 15_000
 export const WEBHOOK_SECRET_PREFIX = 'whsec_'
 export const WEBHOOK_SECRET_BYTES = 24
 
+// Well inside the gateway's 30 second proxy timeout, which closes a
+// connection that has been silent that long.
+export const LIVE_STREAM_PING_MS = 15_000
+export const LIVE_ERROR_LOG_INTERVAL_MS = 60_000
+
 export const DEMO_TARGET_HOLD_MS = MONITOR_LIMITS.timeoutMs.max + 5_000
 export const DEMO_TARGET_STATUS = { min: 200, max: 599 } as const
