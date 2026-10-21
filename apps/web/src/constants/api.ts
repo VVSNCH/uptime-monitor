@@ -22,6 +22,15 @@ export const API_ENDPOINTS = {
   channels: '/channels',
   channel: (id: number) => `/channels/${id}`,
   channelTest: (id: number) => `/channels/${id}/test`,
+  events: '/events',
+} as const
+
+export const LIVE_STREAM = {
+  // The api pings every 15 seconds, so this much silence means the connection is dead.
+  silenceTimeoutMs: 45_000,
+  retryDelayMs: { min: 1_000, max: 30_000 },
+  // Events arriving within this window are applied in one go.
+  batchMs: 1_000,
 } as const
 
 // Requests that must never trigger a token refresh: they are how a session

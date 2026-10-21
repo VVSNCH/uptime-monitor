@@ -143,8 +143,8 @@ for a session, using the httpOnly cookie; a request that comes back 401 renews
 the token once and is replayed, and concurrent renewals share one request,
 since each refresh token works once and a second use reads as theft. Pages
 behind sign-in load on first visit, so the sign-in screen does not wait for the
-chart library. Lists refresh every 30 seconds until the event stream replaces
-polling.
+chart library. Changes arrive over the event stream; lists also refetch once a
+minute, which is how staleness shows when no events arrive at all.
 
 ### Rules for where code goes
 
@@ -237,7 +237,7 @@ PATCH  /channels/:id
 DELETE /channels/:id
 POST   /channels/:id/test               sends a real sample, returns what the receiver said
 
-GET    /events                      SSE stream
+GET    /events                      SSE stream of the caller's changes, a ping every 15 s
 ```
 
 Conventions: plural nouns, verbs only where the action is not a resource
@@ -287,7 +287,7 @@ ALERT_FROM_EMAIL=alerts@uptime.local
 APP_PUBLIC_URL=http://localhost:5000   linked from every alert
 CHECK_CONCURRENCY=20                    checks one worker runs at once
 RAW_CHECK_RETENTION_DAYS=30            at least 7
-HEARTBEAT_URL                        optional; worker pings after each cycle
+HEARTBEAT_URL                        optional; worker pings it every minute while healthy
 LOG_LEVEL=info
 LOG_FORMAT=json                        pretty for local development
 API_DOCS_ENABLED=true                  serve Swagger UI at /api/docs

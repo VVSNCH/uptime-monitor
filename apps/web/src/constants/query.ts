@@ -14,5 +14,7 @@ export const QUERY_KEYS = {
 export const QUERY_STALE_TIME_MS = 30_000
 export const QUERY_MAX_RETRIES = 2
 
-// Live updates arrive by polling until the event stream exists.
-export const LIVE_REFRESH_MS = 30_000
+// Changes arrive over the event stream; this slower poll is the safety net.
+// It still matters when the stream is healthy: if the worker dies, no events
+// arrive at all, and only a refetch reveals that the monitors have gone stale.
+export const LIVE_REFRESH_MS = 60_000
